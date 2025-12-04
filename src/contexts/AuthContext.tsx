@@ -98,35 +98,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const foundUser = mockUsers.find(
-      u => u.email === email && u.password === password
-    );
-    
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      
-      // Check if backend has newer data
-      try {
-        const res = await fetch(`http://localhost:8000/api/users.php?id=${foundUser.id}`);
-        if (res.ok) {
-          const backendData = await res.json();
-          const finalUser = { ...userWithoutPassword, ...backendData };
-          setUser(finalUser);
-          localStorage.setItem('lms_user', JSON.stringify(finalUser));
+    try {
+      const response = await fetch('http://localhost:8000/api/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.user) {
+          setUser(data.user);
+          localStorage.setItem('lms_user', JSON.stringify(data.user));
           setIsLoading(false);
           return true;
         }
-      } catch (e) {
-        console.error('Login backend sync failed', e);
       }
-
-      setUser(userWithoutPassword);
-      localStorage.setItem('lms_user', JSON.stringify(userWithoutPassword));
-      setIsLoading(false);
-      return true;
+    } catch (error) {
+      console.error('Login failed:', error);
     }
     
     setIsLoading(false);

@@ -1,6 +1,6 @@
 {
-  "name": "LMS Pro - Sistema de Gestão de Aprendizagem",
-  "short_name": "LMS Pro",
+  "name": "Command Portal - Sistema de Gestão de Aprendizagem",
+  "short_name": "Command Portal",
   "description": "Plataforma completa de aprendizagem corporativa",
   "start_url": "/",
   "display": "standalone",

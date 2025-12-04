@@ -5,6 +5,42 @@ import { Category, Course, Article, FAQ } from '@/types';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export const api = {
+  users: {
+    get: async (id: string) => {
+      const response = await fetch(`${API_URL}/users.php?id=${id}`);
+      if (!response.ok) throw new Error('Failed to fetch user');
+      return response.json();
+    },
+    list: async () => {
+      const response = await fetch(`${API_URL}/users.php`);
+      if (!response.ok) throw new Error('Failed to fetch users');
+      return response.json();
+    },
+    create: async (data: any) => {
+      const response = await fetch(`${API_URL}/users.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create user');
+      return response.json();
+    },
+    update: async (id: string, data: any) => {
+      const response = await fetch(`${API_URL}/users.php?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update user');
+      return response.json();
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_URL}/users.php?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete user');
+    },
+  },
   categories: {
     list: async (): Promise<Category[]> => {
       const response = await fetch(`${API_URL}/categories.php`);

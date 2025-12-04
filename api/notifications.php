@@ -60,23 +60,28 @@ switch ($method) {
                     exit;
                 }
 
-                // Check if it's a global notification or personal
+                // Check if it's a personal or global notification
                 $stmt = $pdo->prepare("SELECT user_id FROM notifications WHERE id = ?");
                 $stmt->execute([$data['notificationId']]);
                 $notif = $stmt->fetch();
 
-                if ($notif && $notif['user_id'] === null) {
-                    // Global notification
-                    $stmt = $pdo->prepare("INSERT OR IGNORE INTO notification_reads (user_id, notification_id) VALUES (?, ?)");
-                    $stmt->execute([$userId, $data['notificationId']]);
+                if ($notif) {
+                    if ($notif['user_id']) {
+                        // Personal: Update directly
+                        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
+                        $stmt->execute([$data['notificationId'], $userId]);
+                    } else {
+                        // Global: Insert into notification_reads
+                        $stmt = $pdo->prepare("INSERT OR IGNORE INTO notification_reads (user_id, notification_id) VALUES (?, ?)");
+                        $stmt->execute([$userId, $data['notificationId']]);
+                    }
+                    echo json_encode(['success' => true]);
+                    exit;
                 } else {
-                    // Personal notification
-                    $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
-                    $stmt->execute([$data['notificationId'], $userId]);
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Notification not found']);
+                    exit;
                 }
-
-                echo json_encode(['success' => true]);
-                exit;
             }
 
             // Mark ALL as read

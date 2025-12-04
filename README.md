@@ -1,4 +1,4 @@
-# LMS Pro - Sistema de Gestão de Aprendizagem
+# Command Portal - Sistema de Gestão de Aprendizagem
 
 Este é um sistema completo de gestão de aprendizagem (LMS) desenvolvido para facilitar o treinamento e acompanhamento de colaboradores. O projeto conta com uma interface moderna e responsiva, além de um painel administrativo robusto.
 

@@ -73,7 +73,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <GraduationCap className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="font-bold text-foreground">LMS Pro</h1>
+                <h1 className="font-bold text-foreground">Command Portal</h1>
                 <p className="text-xs text-muted-foreground">
                   {isAdmin ? 'Admin' : 'Colaborador'}
                 </p>

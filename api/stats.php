@@ -10,35 +10,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once 'db.php';
 
-// Mock users to match frontend
-$users = [
-    [
-        'id' => '2',
-        'name' => 'João Silva',
-        'avatar' => 'https://api.dicebear.com/7.x/avataaars/svg?seed=joao'
-    ],
-    [
-        'id' => '3',
-        'name' => 'Maria Santos',
-        'avatar' => 'https://api.dicebear.com/7.x/avataaars/svg?seed=maria'
-    ],
-    [
-        'id' => '4',
-        'name' => 'Pedro Costa',
-        'avatar' => 'https://api.dicebear.com/7.x/avataaars/svg?seed=pedro'
-    ],
-    [
-        'id' => '5',
-        'name' => 'Ana Oliveira',
-        'avatar' => 'https://api.dicebear.com/7.x/avataaars/svg?seed=ana'
-    ]
-];
-
 try {
     // Get total counts
     $totalCourses = $pdo->query("SELECT COUNT(*) FROM courses")->fetchColumn();
     $totalArticles = $pdo->query("SELECT COUNT(*) FROM articles")->fetchColumn();
     $totalLessons = $pdo->query("SELECT COUNT(*) FROM lessons")->fetchColumn();
+
+    // Fetch real users (collaborators)
+    $stmt = $pdo->prepare("SELECT id, name, avatar FROM users WHERE role = 'collaborator'");
+    $stmt->execute();
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $metrics = [];
 
@@ -50,11 +31,8 @@ try {
         $stmt->execute([$userId]);
         $completedLessons = $stmt->fetchColumn();
 
-        // Calculate completed courses (simplified: if user has completed > 80% of lessons in a course)
-        // For now, let's just count completed lessons as a proxy for engagement
-
-        // Get completed articles (from articles table if we had user tracking there, but we only have lesson_completions now)
-        // We need to check lessons of type 'article'
+        // Get completed articles
+        // We check lessons of type 'article' that are completed
         $stmt = $pdo->prepare("
             SELECT COUNT(*) 
             FROM lesson_completions lc
@@ -69,10 +47,10 @@ try {
             'userName' => $user['name'],
             'userAvatar' => $user['avatar'],
             'totalCourses' => (int) $totalCourses,
-            'completedCourses' => 0, // Placeholder, logic would be complex without proper enrollment table
-            'totalArticles' => (int) $totalArticles, // This might be wrong if articles are lessons. Let's assume total articles available in system
+            'completedCourses' => 0, // Placeholder
+            'totalArticles' => (int) $totalArticles,
             'completedArticles' => (int) $completedArticles,
-            'averageScore' => 0, // No tests implemented yet
+            'averageScore' => 0,
             'lastActivity' => date('Y-m-d'), // Placeholder
             'totalCompletedLessons' => (int) $completedLessons,
             'totalLessons' => (int) $totalLessons

@@ -68,7 +68,7 @@ export default function Login() {
               <GraduationCap className="w-8 h-8 text-primary-foreground" />
             )}
           </div>
-          <h1 className="text-2xl font-bold gradient-text">{settings.app_name || 'LMS Pro'}</h1>
+          <h1 className="text-2xl font-bold gradient-text">{settings.app_name || 'Command Portal'}</h1>
           <p className="text-muted-foreground mt-2">Faça login para continuar</p>
         </div>
 
