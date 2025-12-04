@@ -77,7 +77,10 @@ export const api = {
       if (filters?.userId) params.append('userId', filters.userId);
       
       const response = await fetch(`${API_URL}/articles.php?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch articles');
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Failed to fetch articles: ${response.status} ${response.statusText} - ${text}`);
+      }
       return response.json();
     },
     create: async (data: Partial<Article>): Promise<Article> => {
@@ -175,6 +178,70 @@ export const api = {
       const response = await fetch(`${API_URL}/stats.php`);
       if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
+    },
+  },
+  announcements: {
+    list: async (userId?: string): Promise<any[]> => {
+      const url = userId 
+        ? `${API_URL}/announcements.php?userId=${userId}`
+        : `${API_URL}/announcements.php`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch announcements');
+      return response.json();
+    },
+    create: async (data: any): Promise<any> => {
+      const response = await fetch(`${API_URL}/announcements.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create announcement');
+      return response.json();
+    },
+    update: async (id: string, data: any): Promise<void> => {
+      const response = await fetch(`${API_URL}/announcements.php?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update announcement');
+    },
+    delete: async (id: string): Promise<void> => {
+      const response = await fetch(`${API_URL}/announcements.php?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete announcement');
+    },
+    markRead: async (userId: string, announcementId: string): Promise<void> => {
+      const response = await fetch(`${API_URL}/announcements.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_read', userId, announcementId }),
+      });
+      if (!response.ok) throw new Error('Failed to mark announcement as read');
+    },
+  },
+  notifications: {
+    list: async (userId: string): Promise<any[]> => {
+      const response = await fetch(`${API_URL}/notifications.php?userId=${userId}`);
+      if (!response.ok) throw new Error('Failed to fetch notifications');
+      return response.json();
+    },
+    markRead: async (userId: string, notificationId: string): Promise<void> => {
+      const response = await fetch(`${API_URL}/notifications.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_read', userId, notificationId }),
+      });
+      if (!response.ok) throw new Error('Failed to mark notification as read');
+    },
+    markAllRead: async (userId: string): Promise<void> => {
+      const response = await fetch(`${API_URL}/notifications.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_all_read', userId }),
+      });
+      if (!response.ok) throw new Error('Failed to mark all notifications as read');
     },
   },
 };

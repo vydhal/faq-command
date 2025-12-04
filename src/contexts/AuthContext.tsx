@@ -7,6 +7,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAdmin: boolean;
+  refreshUser?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,13 +49,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshUser = async () => {
+    if (!user) return;
+    try {
+      // Import api here to avoid circular dependency if possible, or just use fetch
+      // But since api.ts uses simple fetch, we can use it if imported.
+      // Let's use fetch directly to be safe or assume api is available.
+      // Actually, we can just use the api service if we import it.
+      // Let's use fetch to keep it simple and avoid import issues in this file if any.
+      const response = await fetch(`http://localhost:8000/api/users.php?id=${user.id}`);
+      if (response.ok) {
+        const userData = await response.json();
+        // Merge with existing user data (to keep role/email if API doesn't return everything)
+        const updatedUser = { ...user, ...userData };
+        setUser(updatedUser);
+        localStorage.setItem('lms_user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+    }
+  };
+
   useEffect(() => {
     // Check for stored session
     const storedUser = localStorage.getItem('lms_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      
+      // Fetch fresh data from backend
+      fetch(`http://localhost:8000/api/users.php?id=${parsedUser.id}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to fetch');
+        })
+        .then(userData => {
+          const updatedUser = { ...parsedUser, ...userData };
+          setUser(updatedUser);
+          localStorage.setItem('lms_user', JSON.stringify(updatedUser));
+        })
+        .catch(err => console.error('Background user refresh failed:', err))
+        .finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -69,6 +107,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (foundUser) {
       const { password: _, ...userWithoutPassword } = foundUser;
+      
+      // Check if backend has newer data
+      try {
+        const res = await fetch(`http://localhost:8000/api/users.php?id=${foundUser.id}`);
+        if (res.ok) {
+          const backendData = await res.json();
+          const finalUser = { ...userWithoutPassword, ...backendData };
+          setUser(finalUser);
+          localStorage.setItem('lms_user', JSON.stringify(finalUser));
+          setIsLoading(false);
+          return true;
+        }
+      } catch (e) {
+        console.error('Login backend sync failed', e);
+      }
+
       setUser(userWithoutPassword);
       localStorage.setItem('lms_user', JSON.stringify(userWithoutPassword));
       setIsLoading(false);
@@ -92,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         isAdmin: user?.role === 'admin',
+        refreshUser
       }}
     >
       {children}

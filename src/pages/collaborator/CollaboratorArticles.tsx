@@ -4,7 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Article, Category } from '@/types';
 import { ArticleCard } from '@/components/cards/ArticleCard';
 import { Input } from '@/components/ui/input';
-import { Search, CheckCircle2 } from 'lucide-react';
+import { Search, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -22,19 +23,73 @@ export default function CollaboratorArticles() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
+  const { user, isLoading: authLoading } = useAuth();
 
+  const fetchData = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch categories first
+      try {
+        const categoriesData = await api.categories.list();
+        setCategories(categoriesData);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        // Continue even if categories fail
+      }
+
+      // Fetch articles
+      const articlesData = await api.articles.list({ userId: user.id });
+      setArticles(articlesData);
+    } catch (error) {
+      console.error('Failed to fetch articles:', error);
+      setError('Não foi possível carregar os artigos. Verifique sua conexão ou tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    if (user) {
+      fetchData();
+    } else if (!authLoading) {
+      setLoading(false);
+    }
+
+    // Force loading to false after 5 seconds to prevent infinite loading
+    timeoutId = setTimeout(() => {
+      setLoading((currentLoading) => {
+        if (currentLoading) {
+          setError('O carregamento demorou muito. Verifique se há extensões bloqueando o acesso.');
+          return false;
+        }
+        return currentLoading;
+      });
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [user, authLoading]);
 
   const handleArticleClick = (article: Article) => {
     setSelectedArticle(article);
     setIsDetailsOpen(true);
   };
 
+  const handleProgressUpdate = () => {
+    fetchData();
+  };
+
   const filteredArticles = articles.filter((article) => {
     const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || article.categoryId === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || String(article.categoryId) === String(selectedCategory);
     
     switch (activeTab) {
       case 'completed':
@@ -50,38 +105,27 @@ export default function CollaboratorArticles() {
   const pendingCount = articles.filter((a) => !a.isCompleted).length;
 
   if (loading) {
-    return <div className="p-8 text-center">Carregando...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground">Carregando artigos...</p>
+      </div>
+    );
   }
 
-  const { user, isLoading: authLoading } = useAuth();
-
-  const fetchData = async () => {
-    if (!user) return;
-    try {
-      const [articlesData, categoriesData] = await Promise.all([
-        api.articles.list({ userId: user.id }),
-        api.categories.list()
-      ]);
-      setArticles(articlesData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchData();
-    } else if (!authLoading) {
-      setLoading(false);
-    }
-  }, [user, authLoading]);
-
-  const handleProgressUpdate = () => {
-    fetchData();
-  };
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-center">
+        <AlertCircle className="w-12 h-12 text-destructive" />
+        <h3 className="text-lg font-semibold">Erro ao carregar</h3>
+        <p className="text-muted-foreground max-w-md">{error}</p>
+        <Button onClick={fetchData} variant="outline" className="gap-2">
+          <RefreshCw className="w-4 h-4" />
+          Tentar Novamente
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

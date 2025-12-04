@@ -12,6 +12,7 @@ import {
   LogOut,
   GraduationCap,
   X,
+  Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -27,6 +28,7 @@ const adminLinks = [
   { to: '/admin/categories', icon: FolderOpen, label: 'Categorias' },
   { to: '/admin/users', icon: Users, label: 'Usuários' },
   { to: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
+  { to: '/admin/announcements', icon: Bell, label: 'Comunicados' },
   { to: '/admin/settings', icon: Settings, label: 'Personalização' },
 ];
 
@@ -35,6 +37,7 @@ const collaboratorLinks = [
   { to: '/courses', icon: BookOpen, label: 'Meus Cursos' },
   { to: '/articles', icon: FileText, label: 'Artigos' },
   { to: '/faqs', icon: HelpCircle, label: 'Perguntas Frequentes' },
+  { to: '/collaborator/announcements', icon: Bell, label: 'Comunicados' },
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
@@ -114,7 +117,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           {/* User section */}
           <div className="p-4 border-t border-sidebar-border">
-            <div className="flex items-center gap-3 mb-4">
+            <NavLink to="/profile" className="flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity">
               <img
                 src={user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                 alt={user?.name}
@@ -124,7 +127,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <p className="font-medium text-sm truncate">{user?.name}</p>
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
-            </div>
+            </NavLink>
             <Button
               variant="ghost"
               className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"

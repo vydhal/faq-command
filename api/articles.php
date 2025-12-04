@@ -80,6 +80,17 @@ switch ($method) {
             $id = $pdo->lastInsertId();
             $data['id'] = (string) $id;
 
+            // Create Notification
+            require_once 'notification_helper.php';
+            createNotification(
+                $pdo,
+                null, // Global notification
+                'Novo Artigo: ' . $data['title'],
+                'Leia o novo artigo disponível na biblioteca.',
+                'article',
+                '/articles'
+            );
+
             echo json_encode($data);
         } catch (PDOException $e) {
             http_response_code(500);

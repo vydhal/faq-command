@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,14 +6,28 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GraduationCap, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '@/services/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [settings, setSettings] = useState<any>({});
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await api.settings.get();
+        setSettings(data);
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,10 +61,14 @@ export default function Login() {
       <div className="w-full max-w-md relative animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
-            <GraduationCap className="w-8 h-8 text-primary-foreground" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow overflow-hidden">
+            {settings.logo_url ? (
+              <img src={settings.logo_url} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+              <GraduationCap className="w-8 h-8 text-primary-foreground" />
+            )}
           </div>
-          <h1 className="text-2xl font-bold gradient-text">LMS Pro</h1>
+          <h1 className="text-2xl font-bold gradient-text">{settings.app_name || 'LMS Pro'}</h1>
           <p className="text-muted-foreground mt-2">Faça login para continuar</p>
         </div>
 

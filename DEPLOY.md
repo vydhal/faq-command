@@ -46,7 +46,7 @@ This project uses a React frontend (Vite) and a PHP/SQLite backend.
 To run locally:
 1.  Start the PHP server:
     ```bash
-    php -S localhost:8000 -t .
+    php -S localhost:8000 -t . -c php.ini
     ```
 2.  Start the Vite dev server:
     ```bash

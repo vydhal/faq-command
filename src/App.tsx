@@ -18,12 +18,15 @@ import AdminCategories from "@/pages/admin/AdminCategories";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminFAQs from "@/pages/admin/AdminFAQs";
 import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminAnnouncements from "@/pages/admin/AdminAnnouncements";
 
 // Collaborator Pages
 import CollaboratorDashboard from "@/pages/collaborator/CollaboratorDashboard";
 import CollaboratorCourses from "@/pages/collaborator/CollaboratorCourses";
 import CollaboratorArticles from "@/pages/collaborator/CollaboratorArticles";
 import CollaboratorFAQs from "@/pages/collaborator/CollaboratorFAQs";
+import CollaboratorAnnouncements from "@/pages/collaborator/CollaboratorAnnouncements";
+import Profile from "@/pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -129,6 +132,7 @@ function AppRoutes() {
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/faqs" element={<AdminFAQs />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/announcements" element={<AdminAnnouncements />} />
       </Route>
 
       {/* Collaborator routes */}
@@ -143,6 +147,8 @@ function AppRoutes() {
         <Route path="/courses" element={<CollaboratorCourses />} />
         <Route path="/articles" element={<CollaboratorArticles />} />
         <Route path="/faqs" element={<CollaboratorFAQs />} />
+        <Route path="/collaborator/announcements" element={<CollaboratorAnnouncements />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
 
       {/* 404 */}
