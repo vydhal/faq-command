@@ -45,6 +45,9 @@ const mockUsers: (User & { password: string })[] = [
   },
 ];
 
+// Define API URL based on environment
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,12 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUser = async () => {
     if (!user) return;
     try {
-      // Import api here to avoid circular dependency if possible, or just use fetch
-      // But since api.ts uses simple fetch, we can use it if imported.
-      // Let's use fetch directly to be safe or assume api is available.
-      // Actually, we can just use the api service if we import it.
-      // Let's use fetch to keep it simple and avoid import issues in this file if any.
-      const response = await fetch(`http://localhost:8000/api/users.php?id=${user.id}`);
+      const response = await fetch(`${API_URL}/users.php?id=${user.id}`);
       if (response.ok) {
         const userData = await response.json();
         // Merge with existing user data (to keep role/email if API doesn't return everything)
@@ -78,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(parsedUser);
       
       // Fetch fresh data from backend
-      fetch(`http://localhost:8000/api/users.php?id=${parsedUser.id}`)
+      fetch(`${API_URL}/users.php?id=${parsedUser.id}`)
         .then(res => {
           if (res.ok) return res.json();
           throw new Error('Failed to fetch');
@@ -99,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:8000/api/login.php', {
+      const response = await fetch(`${API_URL}/login.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
