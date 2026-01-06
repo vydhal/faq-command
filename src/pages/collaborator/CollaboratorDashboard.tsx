@@ -30,17 +30,30 @@ export default function CollaboratorDashboard() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /* Quick Links State */
+  const [quickLinks, setQuickLinks] = useState<{ label: string, url: string }[]>([]);
+
   const fetchData = async () => {
     if (!user) return;
     try {
-      const [coursesData, categoriesData, announcementsData] = await Promise.all([
+      const [coursesData, categoriesData, announcementsData, settingsData] = await Promise.all([
         api.courses.list(undefined, user.id),
         api.categories.list(),
-        api.announcements.list(user.id)
+        api.announcements.list(user.id),
+        api.settings.get() // Fetch settings for quick links
       ]);
+
       setCourses(coursesData);
       setCategories(categoriesData);
       setAnnouncements(announcementsData);
+
+      if (settingsData.quick_links) {
+        try {
+          const parsed = JSON.parse(settingsData.quick_links);
+          if (Array.isArray(parsed)) setQuickLinks(parsed);
+        } catch (e) { console.error("Error parsing quick links", e); }
+      }
+
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -54,6 +67,7 @@ export default function CollaboratorDashboard() {
     }
   }, [user]);
 
+  // ... (calculations)
   const filteredCourses = selectedCategory
     ? courses.filter((c) => c.categoryId === selectedCategory)
     : courses;
@@ -74,9 +88,9 @@ export default function CollaboratorDashboard() {
       <div className="glass-card p-6 rounded-xl border border-border/50 bg-gradient-hero">
         <div className="flex items-center gap-4">
           <img
-            src={user?.avatar}
+            src={user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
             alt={user?.name}
-            className="w-16 h-16 rounded-full border-2 border-primary/50"
+            className="w-16 h-16 rounded-full border-2 border-primary/50 object-cover bg-secondary"
           />
           <div className="flex-1">
             <h1 className="text-xl sm:text-2xl font-bold">
@@ -136,27 +150,27 @@ export default function CollaboratorDashboard() {
       </div>
 
       {/* Quick Links */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Links Rápidos</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { label: 'Meus Certificados', icon: Award, href: '#' },
-            { label: 'Suporte Técnico', icon: Headphones, href: '#' },
-            { label: 'Comunidade', icon: Users, href: '#' },
-          ].map((link, i) => (
-            <a
-              key={i}
-              href={link.href}
-              className="glass-card p-4 flex items-center gap-4 hover:bg-secondary/50 transition-colors group rounded-xl border border-border/50"
-            >
-              <div className="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <link.icon className="w-6 h-6" />
-              </div>
-              <span className="font-medium">{link.label}</span>
-            </a>
-          ))}
+      {quickLinks.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold">Links Rápidos</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {quickLinks.map((link, i) => (
+              <a
+                key={i}
+                href={link.url}
+                target="_blank"
+                rel="noreferrer"
+                className="glass-card p-4 flex items-center gap-4 hover:bg-secondary/50 transition-colors group rounded-xl border border-border/50"
+              >
+                <div className="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Award className="w-6 h-6" />
+                </div>
+                <span className="font-medium truncate">{link.label}</span>
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Announcements Widget */}
       <div className="glass-card p-6 rounded-2xl border border-border/50">
@@ -172,8 +186,8 @@ export default function CollaboratorDashboard() {
             <div
               key={announcement.id}
               className={`p-4 rounded-xl border transition-colors ${!announcement.is_read
-                  ? 'bg-primary/5 border-primary/20'
-                  : 'bg-secondary/30 border-border/50'
+                ? 'bg-primary/5 border-primary/20'
+                : 'bg-secondary/30 border-border/50'
                 }`}
             >
               <div className="flex items-start justify-between gap-4">

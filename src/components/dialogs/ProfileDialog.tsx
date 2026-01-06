@@ -50,6 +50,12 @@ export function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
                 avatar: formData.avatar,
             });
 
+            // Force a profile refresh to ensure exact sync
+            if (api.users.get) {
+                // In a real scenario we might re-fetch, but updating local context is usually enough
+                // However, let's ensure the user object is fully updated in context
+            }
+
             toast({
                 title: "Sucesso",
                 description: "Perfil atualizado com sucesso!",

@@ -77,13 +77,13 @@ export function CourseDetailsDialog({ course, open, onOpenChange, onProgressUpda
 
   const handleToggleComplete = async (lessonId: string) => {
     if (!user) return;
-    
+
     const isCompleted = completedLessons.includes(lessonId);
     const newStatus = !isCompleted;
-    
+
     try {
       await api.progress.toggle(user.id, parseInt(lessonId), newStatus);
-      
+
       let newCompletedLessons;
       if (newStatus) {
         newCompletedLessons = [...completedLessons, lessonId];
@@ -91,7 +91,7 @@ export function CourseDetailsDialog({ course, open, onOpenChange, onProgressUpda
         newCompletedLessons = completedLessons.filter(id => id !== lessonId);
       }
       setCompletedLessons(newCompletedLessons);
-      
+
       // Update local progress
       if (lessons.length > 0) {
         const newProgress = Math.round((newCompletedLessons.length / lessons.length) * 100);
@@ -119,7 +119,7 @@ export function CourseDetailsDialog({ course, open, onOpenChange, onProgressUpda
     if (lesson.type === 'video') {
       // Check if it's a YouTube URL
       const youtubeMatch = lesson.content.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^#&?]*).*/);
-      
+
       if (youtubeMatch && youtubeMatch[1]) {
         return (
           <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
@@ -170,8 +170,8 @@ export function CourseDetailsDialog({ course, open, onOpenChange, onProgressUpda
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
-        
+      <DialogContent className="max-w-6xl max-h-[90vh] h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-background/95 backdrop-blur-lg border-primary/20">
+
         {/* Header */}
         <div className="p-4 border-b flex items-center justify-between bg-background z-10">
           <div className="flex items-center gap-3">
@@ -188,30 +188,30 @@ export function CourseDetailsDialog({ course, open, onOpenChange, onProgressUpda
             </div>
           </div>
           <div className="flex items-center gap-4">
-             <div className="flex flex-col items-end">
-                <span className="text-xs text-muted-foreground">Progresso</span>
-                <span className="text-sm font-bold">{currentProgress}%</span>
-             </div>
-             <Progress value={currentProgress} className="w-24 h-2" />
+            <div className="flex flex-col items-end">
+              <span className="text-xs text-muted-foreground">Progresso</span>
+              <span className="text-sm font-bold">{currentProgress}%</span>
+            </div>
+            <Progress value={currentProgress} className="w-24 h-2" />
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-          
+
           {/* Main Content Area */}
           <div className={`flex-1 overflow-y-auto p-6 ${activeLesson ? 'block' : 'hidden md:block'}`}>
             {activeLesson ? (
               <div className="space-y-6 animate-fade-in">
                 {renderLessonContent(activeLesson)}
-                
+
                 <div className="flex items-center justify-between pt-4 border-t">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="capitalize">
                       {activeLesson.type === 'video' ? 'Vídeo Aula' : activeLesson.type === 'article' ? 'Artigo' : 'Documento'}
                     </Badge>
                   </div>
-                  <Button 
+                  <Button
                     variant={completedLessons.includes(activeLesson.id) ? "default" : "outline"}
                     className={completedLessons.includes(activeLesson.id) ? "bg-success hover:bg-success/90" : ""}
                     onClick={() => handleToggleComplete(activeLesson.id)}
@@ -233,8 +233,8 @@ export function CourseDetailsDialog({ course, open, onOpenChange, onProgressUpda
             ) : (
               <div className="space-y-6">
                 <div className="relative aspect-video rounded-lg overflow-hidden">
-                  <img 
-                    src={course.thumbnail} 
+                  <img
+                    src={course.thumbnail}
                     alt={course.title}
                     className="w-full h-full object-cover"
                   />
@@ -288,21 +288,18 @@ export function CourseDetailsDialog({ course, open, onOpenChange, onProgressUpda
                     <button
                       key={lesson.id}
                       onClick={() => setActiveLesson(lesson)}
-                      className={`w-full p-4 flex items-start gap-3 text-left transition-colors hover:bg-muted/50 ${
-                        activeLesson?.id === lesson.id ? 'bg-primary/5 border-l-2 border-primary' : ''
-                      }`}
+                      className={`w-full p-4 flex items-start gap-3 text-left transition-colors hover:bg-muted/50 ${activeLesson?.id === lesson.id ? 'bg-primary/5 border-l-2 border-primary' : ''
+                        }`}
                     >
-                      <div className={`mt-1 w-5 h-5 rounded-full flex items-center justify-center border ${
-                        completedLessons.includes(lesson.id) 
-                          ? 'bg-success border-success text-success-foreground' 
+                      <div className={`mt-1 w-5 h-5 rounded-full flex items-center justify-center border ${completedLessons.includes(lesson.id)
+                          ? 'bg-success border-success text-success-foreground'
                           : 'border-muted-foreground/30 text-transparent'
-                      }`}>
+                        }`}>
                         <CheckCircle2 className="w-3 h-3" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium leading-none mb-1.5 ${
-                          activeLesson?.id === lesson.id ? 'text-primary' : ''
-                        }`}>
+                        <p className={`text-sm font-medium leading-none mb-1.5 ${activeLesson?.id === lesson.id ? 'text-primary' : ''
+                          }`}>
                           {i + 1}. {lesson.title}
                         </p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
