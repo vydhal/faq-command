@@ -127,7 +127,7 @@ export default function AdminAnnouncements() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm} className="gap-2">
+            <Button onClick={resetForm} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
               <Plus className="w-4 h-4" /> Novo Comunicado
             </Button>
           </DialogTrigger>
@@ -147,7 +147,7 @@ export default function AdminAnnouncements() {
                   placeholder="Ex: Manutenção Programada"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Prioridade</label>
                 <Select
@@ -224,7 +224,7 @@ export default function AdminAnnouncements() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 variant="ghost"

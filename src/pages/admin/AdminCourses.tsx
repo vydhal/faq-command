@@ -141,13 +141,13 @@ export default function AdminCourses() {
           <h1 className="text-2xl font-bold">Cursos</h1>
           <p className="text-muted-foreground">Gerencie os cursos da plataforma</p>
         </div>
-        
+
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();
         }}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-primary hover:opacity-90" onClick={resetForm}>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={resetForm}>
               <Plus className="w-4 h-4 mr-2" />
               Novo Curso
             </Button>
@@ -156,29 +156,29 @@ export default function AdminCourses() {
             <DialogHeader>
               <DialogTitle>{editingCourse ? 'Editar Curso' : 'Novo Curso'}</DialogTitle>
             </DialogHeader>
-            
+
             <Tabs defaultValue="details" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="details">Detalhes</TabsTrigger>
                 <TabsTrigger value="content" disabled={!editingCourse}>Conteúdo</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="details" className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Título</Label>
-                    <Input 
-                      id="title" 
-                      value={newCourse.title} 
-                      onChange={(e) => setNewCourse({...newCourse, title: e.target.value})}
+                    <Input
+                      id="title"
+                      value={newCourse.title}
+                      onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
                       placeholder="Ex: React Completo"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="categoryId">Categoria</Label>
-                    <Select 
-                      value={newCourse.categoryId} 
-                      onValueChange={(value) => setNewCourse({...newCourse, categoryId: value})}
+                    <Select
+                      value={newCourse.categoryId}
+                      onValueChange={(value) => setNewCourse({ ...newCourse, categoryId: value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione..." />
@@ -191,13 +191,13 @@ export default function AdminCourses() {
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="description">Descrição</Label>
-                  <Input 
-                    id="description" 
-                    value={newCourse.description} 
-                    onChange={(e) => setNewCourse({...newCourse, description: e.target.value})}
+                  <Input
+                    id="description"
+                    value={newCourse.description}
+                    onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
                     placeholder="Descrição do curso"
                   />
                 </div>
@@ -205,20 +205,20 @@ export default function AdminCourses() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="duration">Duração</Label>
-                    <Input 
-                      id="duration" 
-                      value={newCourse.duration} 
-                      onChange={(e) => setNewCourse({...newCourse, duration: e.target.value})}
+                    <Input
+                      id="duration"
+                      value={newCourse.duration}
+                      onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })}
                       placeholder="Ex: 40h"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lessonsCount">Nº de Aulas</Label>
-                    <Input 
-                      id="lessonsCount" 
+                    <Input
+                      id="lessonsCount"
                       type="number"
-                      value={newCourse.lessonsCount} 
-                      onChange={(e) => setNewCourse({...newCourse, lessonsCount: parseInt(e.target.value)})}
+                      value={newCourse.lessonsCount}
+                      onChange={(e) => setNewCourse({ ...newCourse, lessonsCount: parseInt(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -227,11 +227,11 @@ export default function AdminCourses() {
                   <Label>Imagem de Capa</Label>
                   <ImageUpload
                     value={newCourse.thumbnail}
-                    onChange={(url) => setNewCourse({...newCourse, thumbnail: url})}
+                    onChange={(url) => setNewCourse({ ...newCourse, thumbnail: url })}
                   />
                 </div>
 
-                <Button onClick={handleSaveCourse} className="w-full">
+                <Button onClick={handleSaveCourse} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                   {editingCourse ? 'Salvar Alterações' : 'Criar Curso'}
                 </Button>
               </TabsContent>
@@ -290,9 +290,9 @@ export default function AdminCourses() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCourses.map((course) => (
             <div key={course.id} className="relative group">
-              <CourseCard 
-                course={course} 
-                showProgress={false} 
+              <CourseCard
+                course={course}
+                showProgress={false}
                 onClick={() => handleEditCourse(course)}
               />
               <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm p-1 rounded-md z-10">

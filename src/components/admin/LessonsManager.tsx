@@ -55,7 +55,8 @@ export function LessonsManager({ courseId }: LessonsManagerProps) {
 
   const fetchLessons = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/lessons.php?courseId=${courseId}`);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_URL}/lessons.php?courseId=${courseId}`);
       const data = await response.json();
       if (Array.isArray(data)) {
         setLessons(data);
@@ -73,9 +74,10 @@ export function LessonsManager({ courseId }: LessonsManagerProps) {
 
   const handleSaveLesson = async () => {
     try {
-      const url = 'http://localhost:8000/api/lessons.php' + (editingLesson ? `?id=${editingLesson.id}` : '');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const url = `${API_URL}/lessons.php` + (editingLesson ? `?id=${editingLesson.id}` : '');
       const method = editingLesson ? 'PUT' : 'POST';
-      const body = editingLesson 
+      const body = editingLesson
         ? { ...newLesson, id: editingLesson.id, course_id: courseId }
         : { ...newLesson, course_id: courseId };
 
@@ -109,7 +111,8 @@ export function LessonsManager({ courseId }: LessonsManagerProps) {
     if (!confirm('Tem certeza que deseja excluir esta aula?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/lessons.php?id=${id}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_URL}/lessons.php?id=${id}`, {
         method: 'DELETE'
       });
 
@@ -168,7 +171,7 @@ export function LessonsManager({ courseId }: LessonsManagerProps) {
           if (!open) resetForm();
         }}>
           <DialogTrigger asChild>
-            <Button size="sm" onClick={resetForm}>
+            <Button size="sm" onClick={resetForm} className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Plus className="w-4 h-4 mr-2" />
               Adicionar Aula
             </Button>
@@ -221,7 +224,7 @@ export function LessonsManager({ courseId }: LessonsManagerProps) {
                 )}
               </div>
 
-              <Button onClick={handleSaveLesson} className="w-full">
+              <Button onClick={handleSaveLesson} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                 Salvar Aula
               </Button>
             </div>
