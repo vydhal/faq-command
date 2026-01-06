@@ -25,7 +25,8 @@ export default function Profile() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/upload.php', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_URL}/upload.php`, {
         method: 'POST',
         body: formData,
       });
@@ -50,7 +51,8 @@ export default function Profile() {
     setIsLoading(true);
     try {
       // Update user profile via API
-      const response = await fetch('http://localhost:8000/api/users.php?id=' + user.id, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_URL}/users.php?id=${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, avatar }),
@@ -59,7 +61,7 @@ export default function Profile() {
       if (!response.ok) throw new Error('Failed to update profile');
 
       toast.success('Perfil atualizado com sucesso!');
-      
+
       // Update context if available
       if (refreshUser) {
         await refreshUser();
@@ -95,7 +97,7 @@ export default function Profile() {
                   <AvatarImage src={avatar} />
                   <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div 
+                <div
                   className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
                 >
@@ -109,9 +111,9 @@ export default function Profile() {
                 accept="image/*"
                 onChange={handleFileChange}
               />
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -141,7 +143,7 @@ export default function Profile() {
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
