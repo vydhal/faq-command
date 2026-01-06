@@ -91,6 +91,48 @@ try {
         FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
     )");
 
+    // Announcements Table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS announcements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        priority TEXT DEFAULT 'normal', -- normal, high, urgent
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    // Announcement Reads Table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS announcement_reads (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        announcement_id INTEGER NOT NULL,
+        read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, announcement_id),
+        FOREIGN KEY (announcement_id) REFERENCES announcements(id) ON DELETE CASCADE
+    )");
+
+    // Notifications Table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT, -- NULL means for all users
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        type TEXT NOT NULL, -- course, article, announcement, system
+        link TEXT,
+        is_read INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    // Notification Reads (for global notifications)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS notification_reads (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        notification_id INTEGER NOT NULL,
+        read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, notification_id),
+        FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE
+    )");
+
     echo "Tables created successfully.<br>";
 
     // Check if categories exist, if not seed them

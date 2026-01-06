@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { progressMetrics } from '@/data/mockData';
+import { useState, useEffect } from 'react';
+import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { Search, Plus, MoreVertical, Mail, Calendar } from 'lucide-react';
+import { Search, Plus, MoreVertical, Mail, Calendar, Trash2, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -12,13 +11,81 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { UserDialog } from '@/components/dialogs/UserDialog';
+import { User } from '@/types';
+import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function AdminUsers() {
+  const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const filteredUsers = progressMetrics.filter((user) =>
-    user.userName.toLowerCase().includes(searchTerm.toLowerCase())
+  const fetchUsers = async () => {
+    try {
+      const data = await api.users.list();
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      toast.error('Erro ao carregar usuários');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleSaveUser = async (data: any) => {
+    try {
+      if (selectedUser) {
+        await api.users.update(selectedUser.id, data);
+        toast.success('Usuário atualizado com sucesso');
+      } else {
+        await api.users.create(data);
+        toast.success('Usuário criado com sucesso');
+      }
+      fetchUsers();
+    } catch (error) {
+      console.error('Failed to save user:', error);
+      toast.error('Erro ao salvar usuário');
+      throw error;
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
+    try {
+      await api.users.delete(id);
+      toast.success('Usuário excluído com sucesso');
+      fetchUsers();
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      toast.error('Erro ao excluir usuário');
+    }
+  };
+
+  const handleEditClick = (user: User) => {
+    setSelectedUser(user);
+    setIsDialogOpen(true);
+  };
+
+  const handleNewClick = () => {
+    setSelectedUser(null);
+    setIsDialogOpen(true);
+  };
+
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return <div className="p-8 text-center">Carregando...</div>;
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -28,7 +95,7 @@ export default function AdminUsers() {
           <h1 className="text-2xl font-bold">Usuários</h1>
           <p className="text-muted-foreground">Gerencie os colaboradores</p>
         </div>
-        <Button className="bg-gradient-primary hover:opacity-90">
+        <Button onClick={handleNewClick} className="bg-gradient-primary hover:opacity-90">
           <Plus className="w-4 h-4 mr-2" />
           Novo Usuário
         </Button>
@@ -47,37 +114,40 @@ export default function AdminUsers() {
 
       {/* Users List */}
       <div className="space-y-4">
-        {filteredUsers.map((user) => {
-          const progress = Math.round(
-            ((user.completedCourses / user.totalCourses) * 50) +
-            ((user.completedArticles / user.totalArticles) * 50)
-          );
-
-          return (
+        {filteredUsers.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            Nenhum usuário encontrado.
+          </div>
+        ) : (
+          filteredUsers.map((user) => (
             <div
-              key={user.userId}
+              key={user.id}
               className="glass-card p-4 sm:p-6 rounded-xl border border-border/50"
             >
               <div className="flex items-start gap-4">
-                <img
-                  src={user.userAvatar}
-                  alt={user.userName}
-                  className="w-12 h-12 rounded-full bg-secondary flex-shrink-0"
-                />
+                <Avatar className="w-12 h-12">
+                  <AvatarImage src={user.avatar} />
+                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="font-semibold">{user.userName}</h3>
+                      <h3 className="font-semibold">{user.name}</h3>
                       <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Mail className="w-3.5 h-3.5" />
-                          colaborador@empresa.com
+                          {user.email}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          Último acesso: {format(user.lastActivity, "dd/MM/yyyy", { locale: ptBR })}
+                        <span className="flex items-center gap-1 capitalize">
+                          {user.role === 'admin' ? 'Administrador' : 'Colaborador'}
                         </span>
+                        {user.createdAt && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5" />
+                            Criado em: {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
                       </div>
                     </div>
                     
@@ -88,49 +158,33 @@ export default function AdminUsers() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-                        <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Remover acesso
+                        <DropdownMenuItem onClick={() => handleEditClick(user)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Cursos</p>
-                      <p className="font-semibold">{user.completedCourses}/{user.totalCourses}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Artigos</p>
-                      <p className="font-semibold">{user.completedArticles}/{user.totalArticles}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Nota Média</p>
-                      <p className="font-semibold text-success">{user.averageScore}%</p>
-                    </div>
-                  </div>
-
-                  {/* Progress bar */}
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">Progresso geral</span>
-                      <span className="font-medium text-primary">{progress}%</span>
-                    </div>
-                    <Progress
-                      value={progress}
-                      className="h-2"
-                      indicatorClassName="bg-gradient-to-r from-primary to-accent"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
-          );
-        })}
+          ))
+        )}
       </div>
+
+      <UserDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen}
+        user={selectedUser}
+        onSave={handleSaveUser}
+      />
     </div>
   );
 }

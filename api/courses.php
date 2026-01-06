@@ -25,10 +25,16 @@ switch ($method) {
             foreach ($courses as &$course) {
                 $course['id'] = (string) $course['id'];
                 $course['categoryId'] = (string) $course['categoryId'];
-                $course['lessonsCount'] = (int) $course['lessonsCount'];
 
                 // Calculate progress if user is logged in
                 if ($userId) {
+                    // Get total lessons count dynamically
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM lessons WHERE course_id = ?");
+                    $stmt->execute([$course['id']]);
+                    $totalLessons = $stmt->fetchColumn();
+                    $course['lessonsCount'] = (int) $totalLessons;
+
+                    // Get completed lessons count
                     $stmt = $pdo->prepare("
                         SELECT COUNT(DISTINCT l.id) 
                         FROM lessons l
@@ -38,12 +44,13 @@ switch ($method) {
                     $stmt->execute([$course['id'], $userId]);
                     $completedCount = $stmt->fetchColumn();
 
-                    if ($course['lessonsCount'] > 0) {
-                        $course['progress'] = round(($completedCount / $course['lessonsCount']) * 100);
+                    if ($totalLessons > 0) {
+                        $course['progress'] = round(($completedCount / $totalLessons) * 100);
                     } else {
                         $course['progress'] = 0;
                     }
                 } else {
+                    $course['lessonsCount'] = (int) $course['lessonsCount'];
                     $course['progress'] = (int) $course['progress'];
                 }
             }

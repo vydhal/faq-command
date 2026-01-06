@@ -60,7 +60,16 @@ export default function AdminArticles() {
   };
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     fetchData();
+
+    // Force loading to false after 5 seconds to prevent infinite loading
+    timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleSaveArticle = async () => {

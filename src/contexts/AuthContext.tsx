@@ -8,72 +8,82 @@ interface AuthContextType {
   logout: () => void;
   isAdmin: boolean;
   updateUser: (user: User) => void;
+  refreshUser?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const mockUsers: (User & { password: string })[] = [
-  {
-    id: '1',
-    name: 'Admin Master',
-    email: 'admin@lms.com',
-    password: 'admin123',
-    role: 'admin',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
-    createdAt: new Date('2024-01-01'),
-  },
-  {
-    id: '2',
-    name: 'João Silva',
-    email: 'joao@empresa.com',
-    password: 'user123',
-    role: 'collaborator',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=joao',
-    createdAt: new Date('2024-02-15'),
-    progress: 65,
-  },
-  {
-    id: '3',
-    name: 'Maria Santos',
-    email: 'maria@empresa.com',
-    password: 'user123',
-    role: 'collaborator',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=maria',
-    createdAt: new Date('2024-03-10'),
-    progress: 42,
-  },
-];
+// Define API URL based on environment
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshUser = async () => {
+    if (!user) return;
+    try {
+      const response = await fetch(`${API_URL}/users.php?id=${user.id}`);
+      if (response.ok) {
+        const userData = await response.json();
+        // Merge with existing user data (to keep role/email if API doesn't return everything)
+        const updatedUser = { ...user, ...userData };
+        setUser(updatedUser);
+        localStorage.setItem('lms_user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+    }
+  };
+
   useEffect(() => {
     // Check for stored session
     const storedUser = localStorage.getItem('lms_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+
+      // Fetch fresh data from backend
+      fetch(`${API_URL}/users.php?id=${parsedUser.id}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to fetch');
+        })
+        .then(userData => {
+          const updatedUser = { ...parsedUser, ...userData };
+          setUser(updatedUser);
+          localStorage.setItem('lms_user', JSON.stringify(updatedUser));
+        })
+        .catch(err => console.error('Background user refresh failed:', err))
+        .finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      const response = await fetch(`${API_URL}/login.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const foundUser = mockUsers.find(
-      u => u.email === email && u.password === password
-    );
-
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('lms_user', JSON.stringify(userWithoutPassword));
-      setIsLoading(false);
-      return true;
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.user) {
+          setUser(data.user);
+          localStorage.setItem('lms_user', JSON.stringify(data.user));
+          setIsLoading(false);
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
     }
 
     setIsLoading(false);
@@ -99,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         isAdmin: user?.role === 'admin',
         updateUser,
+        refreshUser
       }}
     >
       {children}

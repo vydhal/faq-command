@@ -6,6 +6,8 @@ import { Progress } from '@/components/ui/progress';
 import { useState, useEffect } from 'react';
 import { api } from '@/services/api';
 import { Course, Category } from '@/types';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import {
   BookOpen,
   FileText,
@@ -16,31 +18,41 @@ import {
   Headphones,
   Users,
 } from 'lucide-react';
+import { CourseDetailsDialog } from '@/components/dialogs/CourseDetailsDialog';
 
 export default function CollaboratorDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    if (!user) return;
+    try {
+      const [coursesData, categoriesData, announcementsData] = await Promise.all([
+        api.courses.list(undefined, user.id),
+        api.categories.list(),
+        api.announcements.list(user.id)
+      ]);
+      setCourses(coursesData);
+      setCategories(categoriesData);
+      setAnnouncements(announcementsData);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [coursesData, categoriesData] = await Promise.all([
-          api.courses.list(),
-          api.categories.list()
-        ]);
-        setCourses(coursesData);
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   const filteredCourses = selectedCategory
     ? courses.filter((c) => c.categoryId === selectedCategory)
@@ -146,6 +158,49 @@ export default function CollaboratorDashboard() {
         </div>
       </div>
 
+      {/* Announcements Widget */}
+      <div className="glass-card p-6 rounded-2xl border border-border/50">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold">Comunicados Recentes</h2>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/collaborator/announcements')}>
+            Ver todos
+          </Button>
+        </div>
+
+        <div className="space-y-4">
+          {announcements.slice(0, 3).map((announcement) => (
+            <div
+              key={announcement.id}
+              className={`p-4 rounded-xl border transition-colors ${!announcement.is_read
+                  ? 'bg-primary/5 border-primary/20'
+                  : 'bg-secondary/30 border-border/50'
+                }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-medium">{announcement.title}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                    {announcement.content}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {new Date(announcement.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                {!announcement.is_read && (
+                  <span className="flex h-2 w-2 rounded-full bg-primary shrink-0" />
+                )}
+              </div>
+            </div>
+          ))}
+
+          {announcements.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhum comunicado recente
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Categories Filter */}
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Filtrar por Categoria</h2>
@@ -172,7 +227,11 @@ export default function CollaboratorDashboard() {
           {filteredCourses
             .filter((c) => (c.progress || 0) > 0 && (c.progress || 0) < 100)
             .map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <CourseCard
+                key={course.id}
+                course={course}
+                onClick={() => setSelectedCourse(course)}
+              />
             ))}
         </div>
       </div>
@@ -182,11 +241,21 @@ export default function CollaboratorDashboard() {
         <h2 className="text-lg font-semibold">Todos os Cursos</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCourses.map((course) => (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard
+              key={course.id}
+              course={course}
+              onClick={() => setSelectedCourse(course)}
+            />
           ))}
         </div>
       </div>
+      {/* Course Details Dialog */}
+      <CourseDetailsDialog
+        course={selectedCourse}
+        open={!!selectedCourse}
+        onOpenChange={(open) => !open && setSelectedCourse(null)}
+        onProgressUpdate={fetchData}
+      />
     </div>
   );
 }
-

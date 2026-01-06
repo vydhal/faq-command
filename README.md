@@ -1,77 +1,105 @@
-# Welcome to your Lovable project
+# Command Portal - Sistema de Gestão de Aprendizagem
 
-## Project info
+Este é um sistema completo de gestão de aprendizagem (LMS) desenvolvido para facilitar o treinamento e acompanhamento de colaboradores. O projeto conta com uma interface moderna e responsiva, além de um painel administrativo robusto.
 
-**URL**: https://lovable.dev/projects/af679017-4bab-46ec-9013-df533c00525f
+## 🚀 Funcionalidades
 
-## How can I edit this code?
+### Para Colaboradores
+- **Dashboard Personalizado:** Visão geral do progresso, cursos em andamento e conquistas.
+- **Catálogo de Cursos:** Navegação intuitiva por cursos e categorias.
+- **Leitura de Artigos:** Biblioteca de artigos com marcação de leitura e filtros por categoria.
+- **Sistema de Notificações:** Alertas sobre novos conteúdos e comunicados importantes.
+- **Perfil do Usuário:** Gerenciamento de dados pessoais e upload de foto (avatar).
+- **Gamificação:** Acompanhamento de progresso visual e motivador.
 
-There are several ways of editing your application.
+### Para Administradores
+- **Gestão de Conteúdo:** Criação, edição e remoção de Cursos, Artigos e Categorias.
+- **Gestão de Usuários:** Controle de acesso e permissões.
+- **Comunicados:** Envio de avisos para todos os usuários com confirmação de leitura.
+- **Relatórios:** Visualização de estatísticas de engajamento e progresso.
+- **Personalização:** Ajustes de configurações do sistema.
 
-**Use Lovable**
+## 🛠️ Tecnologias Utilizadas
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/af679017-4bab-46ec-9013-df533c00525f) and start prompting.
+### Frontend
+- **React:** Biblioteca principal para construção da interface.
+- **Vite:** Build tool rápida e leve.
+- **TypeScript:** Tipagem estática para maior segurança e manutenibilidade.
+- **Tailwind CSS:** Framework de estilização utilitário para design moderno.
+- **Shadcn/ui:** Componentes de interface reutilizáveis e acessíveis.
+- **Lucide React:** Biblioteca de ícones.
 
-Changes made via Lovable will be committed automatically to this repo.
+### Backend
+- **PHP:** Linguagem de script para o servidor.
+- **SQLite:** Banco de dados leve e eficiente, sem necessidade de configuração complexa de servidor.
+- **PDO:** Abstração de acesso a dados para segurança e flexibilidade.
 
-**Use your preferred IDE**
+## 📦 Como Rodar Localmente
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Pré-requisitos
+- Node.js e npm instalados.
+- PHP instalado e configurado no PATH do sistema.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Passo a Passo
 
-Follow these steps:
+1.  **Clone o repositório:**
+    ```bash
+    git clone <URL_DO_REPOSITORIO>
+    cd <NOME_DA_PASTA>
+    ```
 
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2.  **Instale as dependências do Frontend:**
+    ```bash
+    npm install
+    ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3.  **Inicie o Servidor Backend (PHP):**
+    Abra um terminal na raiz do projeto e execute:
+    ```bash
+    php -S localhost:8000 -t . -c php.ini
+    ```
+    *Nota: O parâmetro `-c php.ini` é crucial para carregar as extensões necessárias.*
 
-# Step 3: Install the necessary dependencies.
-npm i
+4.  **Inicie o Servidor Frontend (Vite):**
+    Abra outro terminal e execute:
+    ```bash
+    npm run dev
+    ```
 
-# Step 4: Start the PHP Backend Server
-# Open a new terminal and run:
-php -S localhost:8000 -t .
+5.  **Acesse a aplicação:**
+    O frontend estará rodando geralmente em `http://localhost:8080` (ou a porta indicada no terminal).
 
-# Step 5: Start the Frontend Development Server
-# Open another terminal and run:
-npm run dev
-```
+## 🚀 Como Fazer o Deploy (Hostinger)
 
-**Edit a file directly in GitHub**
+Este projeto é compatível com hospedagens PHP compartilhadas, como a Hostinger.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1.  **Build do Frontend:**
+    Gere os arquivos estáticos de produção:
+    ```bash
+    npm run build
+    ```
+    Isso criará uma pasta `dist`.
 
-**Use GitHub Codespaces**
+2.  **Preparar Backend:**
+    Copie a pasta `api` para dentro da pasta `dist`.
+    Estrutura final: `dist/api`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+3.  **Upload:**
+    Faça o upload de todo o conteúdo da pasta `dist` para a pasta `public_html` da sua hospedagem.
 
-## What technologies are used for this project?
+4.  **Banco de Dados:**
+    - O banco de dados `database.sqlite` será criado automaticamente na primeira execução ou você pode fazer o upload do seu arquivo local.
+    - **Importante:** A pasta onde está o banco de dados deve ter permissão de escrita.
 
-This project is built with:
+5.  **Segurança (Opcional mas Recomendado):**
+    Adicione um arquivo `.htaccess` para proteger o banco de dados de download direto:
+    ```apache
+    <Files "database.sqlite">
+        Order allow,deny
+        Deny from all
+    </Files>
+    ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📄 Licença
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/af679017-4bab-46ec-9013-df533c00525f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Este projeto é de uso privado e proprietário.
