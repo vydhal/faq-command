@@ -24,7 +24,8 @@ export function ImageUpload({ value, onChange, className, previewClassName }: Im
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/api/upload.php', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_URL}/upload.php`, {
         method: 'POST',
         body: formData,
       });
