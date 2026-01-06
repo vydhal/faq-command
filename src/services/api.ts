@@ -290,4 +290,11 @@ export const api = {
       if (!response.ok) throw new Error('Failed to mark all notifications as read');
     },
   },
+  stats: {
+    get: async () => {
+      const response = await fetch(`${API_URL}/stats.php`);
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json();
+    },
+  },
 };
