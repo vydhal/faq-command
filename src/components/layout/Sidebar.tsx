@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/services/api';
 import {
   LayoutDashboard,
   BookOpen,
@@ -40,7 +42,22 @@ const collaboratorLinks = [
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
-  
+  const [logo, setLogo] = useState<string>('');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await api.settings.get();
+        if (settings.logo_url) {
+          setLogo(settings.logo_url);
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   const links = isAdmin ? adminLinks : collaboratorLinks;
 
   return (
@@ -66,11 +83,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center overflow-hidden">
+                {logo ? (
+                  <img src={logo} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <GraduationCap className="w-6 h-6 text-primary-foreground" />
+                )}
               </div>
               <div>
-                <h1 className="font-bold text-foreground">LMS Pro</h1>
+                <h1 className="font-bold text-foreground">Command Portal</h1>
                 <p className="text-xs text-muted-foreground">
                   {isAdmin ? 'Admin' : 'Colaborador'}
                 </p>
@@ -91,7 +112,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             {links.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.to;
-              
+
               return (
                 <NavLink
                   key={link.to}

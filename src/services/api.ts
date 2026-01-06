@@ -1,10 +1,20 @@
-import { Category, Course, Article, FAQ } from '@/types';
+import { Category, Course, Article, FAQ, User } from '@/types';
 
 // In production (Hostinger), this should probably be just '/api' or the full URL
 // For local development with php -S, it's http://localhost:8000/api
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export const api = {
+  users: {
+    update: async (id: string, data: Partial<User>): Promise<void> => {
+      const response = await fetch(`${API_URL}/users.php?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update user');
+    },
+  },
   categories: {
     list: async (): Promise<Category[]> => {
       const response = await fetch(`${API_URL}/categories.php`);
@@ -40,7 +50,7 @@ export const api = {
       const params = new URLSearchParams();
       if (categoryId) params.append('categoryId', categoryId);
       if (userId) params.append('userId', userId);
-      
+
       const response = await fetch(`${API_URL}/courses.php?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch courses');
       return response.json();
@@ -75,7 +85,7 @@ export const api = {
       if (filters?.categoryId) params.append('categoryId', filters.categoryId);
       if (filters?.courseId) params.append('courseId', filters.courseId);
       if (filters?.userId) params.append('userId', filters.userId);
-      
+
       const response = await fetch(`${API_URL}/articles.php?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch articles');
       return response.json();
@@ -106,7 +116,7 @@ export const api = {
   },
   faqs: {
     list: async (category?: string): Promise<FAQ[]> => {
-      const url = category 
+      const url = category
         ? `${API_URL}/faqs.php?category=${category}`
         : `${API_URL}/faqs.php`;
       const response = await fetch(url);
@@ -154,7 +164,7 @@ export const api = {
   },
   progress: {
     get: async (userId: string, lessonId?: number): Promise<any> => {
-      const url = lessonId 
+      const url = lessonId
         ? `${API_URL}/progress.php?userId=${userId}&lessonId=${lessonId}`
         : `${API_URL}/progress.php?userId=${userId}`;
       const response = await fetch(url);

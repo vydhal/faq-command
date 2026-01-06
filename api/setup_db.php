@@ -151,7 +151,7 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) FROM settings");
     if ($stmt->fetchColumn() == 0) {
         $defaultSettings = [
-            ['app_name', 'Platform'],
+            ['app_name', ''],
             ['primary_color', '#0f172a'],
             ['logo_url', ''],
             ['favicon_url', '']

@@ -50,7 +50,7 @@ export default function Login() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
             <GraduationCap className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold gradient-text">LMS Pro</h1>
+          <h1 className="text-2xl font-bold gradient-text">Command Portal</h1>
           <p className="text-muted-foreground mt-2">Faça login para continuar</p>
         </div>
 

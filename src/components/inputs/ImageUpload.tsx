@@ -8,9 +8,10 @@ interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   className?: string;
+  previewClassName?: string;
 }
 
-export function ImageUpload({ value, onChange, className }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, className, previewClassName }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,7 +59,7 @@ export function ImageUpload({ value, onChange, className }: ImageUploadProps) {
         ref={fileInputRef}
         onChange={handleFileChange}
       />
-      
+
       {!value ? (
         <Button
           type="button"
@@ -75,7 +76,7 @@ export function ImageUpload({ value, onChange, className }: ImageUploadProps) {
           <span>{isUploading ? 'Enviando...' : 'Clique para fazer upload da imagem'}</span>
         </Button>
       ) : (
-        <div className="relative aspect-video rounded-lg overflow-hidden border">
+        <div className={cn("relative aspect-video rounded-lg overflow-hidden border", previewClassName)}>
           <img
             src={value}
             alt="Upload preview"

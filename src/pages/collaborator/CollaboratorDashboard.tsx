@@ -12,6 +12,9 @@ import {
   Trophy,
   Target,
   Flame,
+  Award,
+  Headphones,
+  Users,
 } from 'lucide-react';
 
 export default function CollaboratorDashboard() {
@@ -45,7 +48,7 @@ export default function CollaboratorDashboard() {
 
   const completedCourses = courses.filter((c) => c.progress === 100).length;
   const inProgressCourses = courses.filter((c) => (c.progress || 0) > 0 && (c.progress || 0) < 100).length;
-  const overallProgress = courses.length > 0 
+  const overallProgress = courses.length > 0
     ? Math.round(courses.reduce((acc, c) => acc + (c.progress || 0), 0) / courses.length)
     : 0;
 
@@ -118,6 +121,29 @@ export default function CollaboratorDashboard() {
           icon={FileText}
           variant="accent"
         />
+      </div>
+
+      {/* Quick Links */}
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold">Links Rápidos</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { label: 'Meus Certificados', icon: Award, href: '#' },
+            { label: 'Suporte Técnico', icon: Headphones, href: '#' },
+            { label: 'Comunidade', icon: Users, href: '#' },
+          ].map((link, i) => (
+            <a
+              key={i}
+              href={link.href}
+              className="glass-card p-4 flex items-center gap-4 hover:bg-secondary/50 transition-colors group rounded-xl border border-border/50"
+            >
+              <div className="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <link.icon className="w-6 h-6" />
+              </div>
+              <span className="font-medium">{link.label}</span>
+            </a>
+          ))}
+        </div>
       </div>
 
       {/* Categories Filter */}
